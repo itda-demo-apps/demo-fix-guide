@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 돋보기 + 계통 점 — "이슈를 찾아 짚어주는 길잡이" -->
+  <rect width="100" height="100" rx="22" fill="#1E2126"/>
+  <circle cx="44" cy="44" r="24" fill="none" stroke="#F2EFE9" stroke-width="6"/>
+  <line x1="62" y1="62" x2="80" y2="80" stroke="#F2EFE9" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="44" cy="44" r="8" fill="#E4574B"/>
+</svg>
