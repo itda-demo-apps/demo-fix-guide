@@ -1,6 +1,6 @@
 # 고장 길잡이 (demo-fix-guide)
 
-현장 AS 이슈 대응 가이드 PWA. 교육용 데모 시리즈의 B축(수강생 결과물 정제판) — 원형은 세라젬 과정 수강생의 "필드 불량 진단 & 조치 앱(6단계 표준 프레임워크)".
+현장 AS 이슈 대응 가이드 PWA — **v0.2 멀티 도메인**(안마의자·정수기·에어컨·보일러·커피머신). 교육용 데모 시리즈의 B축 — 원형은 세라젬 과정 수강생의 "필드 불량 진단 & 조치 앱(6단계 표준 프레임워크)". "데이터만 갈아끼우면 어느 업종이든 된다"가 핵심 메시지(멀티 도메인 확장: 마스터 컨펌 2026-07-23).
 
 ## 배경과 목적
 
@@ -29,7 +29,8 @@ src/
   log.js                   # 해결 기록 유틸 — LOG_KEY, addLog/removeLog
   storage.js               # 스토리지 어댑터 — localStorage 구현 (시리즈 공용)
   styles.css               # 전체 스타일 — 디자인 토큰(CSS 변수) + 클래스. 동적 색만 인라인
-  data/issues.js           # ★ 이슈 맵 정본 — CATS(5계통+색)·ISSUES(30건)·SEVERITY·searchIssues
+  data/packs/              # ★ 이슈 맵 정본 — 도메인팩 5종(각 20~30건). index.js가 레지스트리(PACKS·전역 ISSUE/CAT_BY_ID·SEVERITY·searchIssues)
+  data/issues.js           # 호환 파사드 — packs 재수출
   data/series.js           # 데모 시리즈 목록(SELF_ID·SERIES·REPO_URL) — 새 앱 나오면 여기 추가
   views/
     HomeView.jsx           # 증상 검색 + 계통 필터 + 즐겨찾기 + 계통 카드
@@ -48,7 +49,7 @@ public/                    # PWA 아이콘·og.png·splash/
 
 ## 핵심 로직
 
-- **이슈 데이터** (`data/issues.js`): `{id, cat, severity, symptom, keywords, causes[], steps[], escalate}`. 계통 5개(전원·제어/구동·모터/온열·발열/소음·진동/외관·기타) × 6건 = 30건. **AI 빌드타임 생성 데이터** — 실제 도입 시 내용만 교체하고 구조는 유지할 것. severity high(안전)는 목록에도 라벨 노출.
+- **도메인팩** (`data/packs/*.js`): 팩 = `{id, name, emoji, cats[≤5], issues[]}`, 이슈 = `{id, cat, severity, symptom, keywords, causes[], steps[], escalate}`. 5팩(안마의자 30 + 정수기·에어컨·보일러·커피머신 각 20 = 110건). **이슈 id·계통 id는 전 팩 유일 필수**(즐겨찾기·메모·기록이 id 기준 전역 저장 — 신규 팩은 고유 접두사 사용). 계통 색은 시리즈 5색 순환. 전부 **AI 빌드타임 생성 데이터** — 실도입 시 검수 필수. severity high(안전: 가스·CO·화재·감전·화상)는 목록 라벨 노출. 선택 팩은 fix-app-v1.packId로 저장·복원.
 - **검색** (`searchIssues`): 증상+키워드+계통명을 소문자 결합해 공백 구분 다중 단어 AND 부분 일치. 클라이언트 전용이라 오프라인 동작.
 - **이슈 상세** (`IssueView.jsx`): 원인 후보 → 조치 단계(탭하면 체크·취소선, **세션 한정** — 저장 안 함) → 에스컬레이션(빨간 테두리 강조) → 내 메모(blur 시 저장) → "해결 완료로 기록".
 - **저장**: `fix-app-v1`에 `{favorites, notes}` 통합, 해결 기록은 `fix-log-v1`(최신순, 상한 500). 키를 쪼개지 말 것. 서버 동기화가 필요해지면 storage.js만 교체.
