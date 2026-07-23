@@ -47,6 +47,17 @@ scripts/                   # PIL 아이콘/OG/스플래시 생성 (돋보기+이
 public/                    # PWA 아이콘·og.png·splash/
 ```
 
+## URL 라우팅
+
+`src/router.js`(의존성 없는 history API — `parseLocation`·`navigate`·`useRoute`)가 화면 상태의 진실 소스. `vercel.json`이 SPA 딥링크를 `index.html`로 리라이트한다.
+
+| 경로 | 화면 |
+|---|---|
+| `/` | 가이드 홈 — 도메인팩 전환은 홈 내 상태라 URL에 싣지 않는다 |
+| `/i/:issueId` | 이슈 상세 — 전 팩 전역 유일 id(`ISSUE_BY_ID`)로 로드, `PACK_ID_BY_ISSUE`로 packId 동기화. 없는 id는 홈으로 |
+| `/history` | 해결 기록 |
+| `/contact` | 문의 |
+
 ## 핵심 로직
 
 - **도메인팩** (`data/packs/*.js`): 팩 = `{id, name, emoji, cats[≤5], issues[]}`, 이슈 = `{id, cat, severity, symptom, keywords, causes[], steps[], escalate}`. 5팩(안마의자 30 + 정수기·에어컨·보일러·커피머신 각 20 = 110건). **이슈 id·계통 id는 전 팩 유일 필수**(즐겨찾기·메모·기록이 id 기준 전역 저장 — 신규 팩은 고유 접두사 사용). 계통 색은 시리즈 5색 순환. 전부 **AI 빌드타임 생성 데이터** — 실도입 시 검수 필수. severity high(안전: 가스·CO·화재·감전·화상)는 목록 라벨 노출. 선택 팩은 fix-app-v1.packId로 저장·복원.

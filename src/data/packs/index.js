@@ -15,6 +15,11 @@ export const PACK_BY_ID = Object.fromEntries(PACKS.map((p) => [p.id, p]));
 export const ISSUE_BY_ID = Object.fromEntries(PACKS.flatMap((p) => p.issues.map((i) => [i.id, i])));
 export const CAT_BY_ID = Object.fromEntries(PACKS.flatMap((p) => p.cats.map((c) => [c.id, c])));
 
+// 이슈 id → 소속 팩 id — 이슈 딥링크(/i/:issueId) 진입 시 팩 선택을 동기화하는 데 쓴다
+export const PACK_ID_BY_ISSUE = Object.fromEntries(
+  PACKS.flatMap((p) => p.issues.map((i) => [i.id, p.id])),
+);
+
 export const SEVERITY = {
   high: { name: "안전·긴급", color: "#E4574B" },
   mid: { name: "기능", color: "#E8B93E" },

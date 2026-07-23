@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 
 import { storage } from "./storage";
 import { loadLog, addLog, removeLog } from "./log";
-import { PACKS, PACK_BY_ID } from "./data/packs";
+import { PACKS, PACK_BY_ID, ISSUE_BY_ID, PACK_ID_BY_ISSUE } from "./data/packs";
+import { useRoute, navigate } from "./router";
 import HomeView from "./views/HomeView";
 import IssueView from "./views/IssueView";
 import HistoryView from "./views/HistoryView";
@@ -10,10 +11,15 @@ import ContactView from "./views/ContactView";
 
 const APP_KEY = "fix-app-v1"; // {favorites, notes, packId} 통합 저장 — 키를 쪼개지 말 것
 
+// 화면 이름 → 경로. Header 탭·뒤로가기 등 setView 호출을 navigate로 이어 준다.
+const PATHS = { home: "/", history: "/history", contact: "/contact" };
+
 export default function App() {
   const [ready, setReady] = useState(false);
-  const [view, setView] = useState("home"); // home | issue | history | contact
-  const [issueId, setIssueId] = useState(null);
+  const route = useRoute(); // URL이 화면 상태의 진실 소스
+  const view = route.view; // home | issue | history | contact
+  const issueId = view === "issue" ? route.issueId : null;
+  const setView = (v) => navigate(PATHS[v] ?? "/");
   const [packId, setPackId] = useState(PACKS[0].id); // 선택한 제품 도메인 — 저장·복원
   const [favorites, setFavorites] = useState([]);
   const [notes, setNotes] = useState({});
@@ -44,10 +50,18 @@ export default function App() {
     storage.set(APP_KEY, JSON.stringify({ favorites, notes, packId }));
   }, [ready, favorites, notes, packId]);
 
-  const openIssue = (id) => {
-    setIssueId(id);
-    setView("issue");
-  };
+  const openIssue = (id) => navigate(`/i/${encodeURIComponent(id)}`);
+
+  // 이슈 딥링크(/i/:issueId) 진입 처리 — 없는 이슈는 홈으로, 있으면 그 이슈의 팩으로 동기화
+  useEffect(() => {
+    if (view !== "issue") return;
+    if (!issueId || !ISSUE_BY_ID[issueId]) {
+      navigate("/", { replace: true });
+      return;
+    }
+    const pid = PACK_ID_BY_ISSUE[issueId];
+    if (pid && pid !== packId) setPackId(pid);
+  }, [view, issueId, packId]);
 
   const toggleFavorite = (id) =>
     setFavorites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
@@ -67,7 +81,8 @@ export default function App() {
 
   const pack = PACK_BY_ID[packId];
   const shared = { view, setView, openIssue };
-  if (view === "issue" && issueId)
+  // 유효한 이슈일 때만 상세를 그린다. 없는 이슈는 위 effect가 홈으로 URL을 교체한다.
+  if (view === "issue" && issueId && ISSUE_BY_ID[issueId])
     return (
       <IssueView
         {...shared}
